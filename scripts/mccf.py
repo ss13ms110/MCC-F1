@@ -18,14 +18,15 @@ warnings.filterwarnings("ignore")
 
 # FUNCTIONS ===========================================================
 # make plot ------
-def plot_mcc(f1, mcc_nor, fig_name):
+def plot_mcc(f1, mcc_nor, fig_name, mcc_f1_metric):
     plt.figure(figsize=(8,8))
     plt.xlabel('F1 score', fontsize=20)
     plt.ylabel('normalized MCC', fontsize=20)
     plt.xlim(-0.1,1.1)
     plt.ylim(-0.1,1.1)
-    plt.title('MCC-F1 curve for %s' %(fig_name.split('/')[-1].split('.')[0]))
+    plt.title('MCC-F1 curve for %s\nMCC-F1 metric = %7.5f' %(fig_name.split('/')[-1].split('.')[0], mcc_f1_metric))
     plt.scatter([0,1], [0,1], c=['red', 'green'], s=2**6)
+    plt.hlines(0.5, xmin=0.0, xmax=1.0, linestyles='--', colors='black', linewidth=1)
     plt.plot(f1, mcc_nor, color='black', linewidth=1)
     plt.savefig(fig_name)
 
@@ -56,13 +57,6 @@ for mcc_file in mcc_file_list:
 
     # get rid of NaN values in MCC and F1
     mccNorF1_truncated = mccNor_f1_cfs[~np.isnan(mccNor_f1_cfs).any(axis=1)]
-
-    # --------------------------------------
-    # make plot
-    # --------------------------------------
-    fig_name = '%s/%s.png' %(fig_dir, mcc_file.split('.')[0])
-    plot_mcc(mccNorF1_truncated[:,1], mccNorF1_truncated[:,0], fig_name)
-    # ======================================
 
     # --------------------------------------
     # calculate MCC-F1 metric
@@ -114,4 +108,13 @@ for mcc_file in mcc_file_list:
 
     out_file.write('%s      %7.5f\n' %(mcc_file, MCC_F1_metric))
     # ======================================
+
+    # --------------------------------------
+    # make plot
+    # --------------------------------------
+    fig_name = '%s/%s.png' %(fig_dir, mcc_file.split('.')[0])
+    plot_mcc(mccNorF1_truncated[:,1], mccNorF1_truncated[:,0], fig_name, MCC_F1_metric)
+    # ======================================
+    
+out_file.close()
 print('\n           DONE!!!\n Figures saved in %s\nOutput saved in %s\n' %(fig_dir, mcc_output_file))
