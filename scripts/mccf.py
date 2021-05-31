@@ -17,18 +17,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # FUNCTIONS ===========================================================
-# make plot ------
-def plot_mcc(f1, mcc_nor, fig_name, mcc_f1_metric):
-    plt.figure(figsize=(8,8))
-    plt.xlabel('F1 score', fontsize=20)
-    plt.ylabel('normalized MCC', fontsize=20)
-    plt.xlim(-0.1,1.1)
-    plt.ylim(-0.1,1.1)
-    plt.title('MCC-F1 curve for %s\nMCC-F1 metric = %7.5f' %(fig_name.split('/')[-1].split('.')[0], mcc_f1_metric))
-    plt.scatter([0,1], [0,1], c=['red', 'green'], s=2**6)
-    plt.hlines(0.5, xmin=0.0, xmax=1.0, linestyles='--', colors='black', linewidth=1)
-    plt.plot(f1, mcc_nor, color='black', linewidth=1)
-    plt.savefig(fig_name)
 
 # calculate distance ------
 def calc_mean_dist(x1, y1, x2, y2):
@@ -37,7 +25,7 @@ def calc_mean_dist(x1, y1, x2, y2):
 # ====================================================================
 # main
 mcc_input_dir = './inputs'
-fig_dir = './figs'
+fig_name = './figs/mcc_f1.png'
 mcc_output_file = './outputs/mcc-f1.out'
 
 # params
@@ -47,6 +35,17 @@ bins = 100
 mcc_file_list = os.listdir(mcc_input_dir)
 out_file = open(mcc_output_file, 'w')
 out_file.write('input-file          mcc-f1-metric\n')
+
+# set figure ===========================================================
+plt.figure(figsize=(8,8))
+plt.xlabel('F1 score', fontsize=20)
+plt.ylabel('normalized MCC', fontsize=20)
+plt.xlim(-0.1,1.1)
+plt.ylim(-0.1,1.1)
+plt.title('MCC-F1 curve')
+plt.scatter([0,1], [0,1], c=['red', 'green'], s=2**6)
+plt.hlines(0.5, xmin=0.0, xmax=1.0, linestyles='--', colors='black', linewidth=1)
+# ======================================================================
 
 # loop in files
 for mcc_file in mcc_file_list:
@@ -112,9 +111,14 @@ for mcc_file in mcc_file_list:
     # --------------------------------------
     # make plot
     # --------------------------------------
-    fig_name = '%s/%s.png' %(fig_dir, mcc_file.split('.')[0])
-    plot_mcc(mccNorF1_truncated[:,1], mccNorF1_truncated[:,0], fig_name, MCC_F1_metric)
-    # ======================================
     
+    mcc_file_base = mcc_file.split('.')[0]
+    plt.plot(mccNorF1_truncated[:,1], mccNorF1_truncated[:,0], linewidth=1, label='%s = %5.3f' %(mcc_file_base, MCC_F1_metric))
+    # ======================================
+
+plt.legend(loc='lower right', prop={'size': 14}, title='MCC-F1 metric for', fontsize='medium', shadow=True)
+plt.savefig(fig_name)
 out_file.close()
-print('\n           DONE!!!\n Figures saved in %s\nOutput saved in %s\n' %(fig_dir, mcc_output_file))
+
+# ===================== FINISH ==============================
+print('\n           DONE!!!\n\nFigures saved as %s\nOutput saved in %s\n' %(fig_name, mcc_output_file))
